@@ -2,8 +2,13 @@
 var HClass = require('./HClass');
 var TextPage = HClass.extend({
     textLines:[],
+    pageIndex:0,
     addTextLine:function(textLine){
+        textLine.setLine(this.textLines.length);
         this.textLines.push(textLine);
+    },
+    setPage:function(pageIndex){
+        this.pageIndex = pageIndex;
     },
     getTextLine:function(index){
         if(index<0){

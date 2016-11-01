@@ -2,7 +2,12 @@
 var HClass = require('./HClass');
 var TextArt = HClass.extend({
     textPages:[],
+    allText:"",
+    ctor:function(text){
+        this.allText = text;
+    },
     addTextPage:function(textPage){
+        textPage.setPage(this.textPages.length);
         this.textPages.push(textPage);
     },
     getTextPage:function(index){
