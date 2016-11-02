@@ -9,7 +9,7 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         this._super($canvas);
         this.initListener();
     },
-    drawNextPage:function(){
+    drawNextPage:function(moveX){
         if(this.turnLock){
             return;
         }
@@ -19,12 +19,12 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         if(currentPage==nextPage){//说明是第一张或者最后一张 直接画
             this.drawPage(nextPage);
         }else if(nextPage!=null){
-            this.startNormalTurnPage(currentPage,nextPage,true);
+            this.startNormalTurnPage(currentPage,nextPage,true,moveX);
         }else{
             //发出已经到最后一页的广播
         }
     },
-    drawPrePage:function(){
+    drawPrePage:function(moveX){
         if(this.turnLock){
             return;
         }
@@ -34,20 +34,22 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         if(currentPage==prePage){//说明是第一张或者最后一张 直接画
             this.drawPage(prePage);
         }else if(prePage!=null){
-            this.startNormalTurnPage(prePage,currentPage,false);
+            this.startNormalTurnPage(prePage,currentPage,false,moveX);
         }else{
             //发出已经到第一页的广播
         }
     },
-    startNormalTurnPage:function(page1,page2,isNext){
+    startNormalTurnPage:function(page1,page2,isNext,moveX){
         if(this.turnLock){
             return;
         }
         this.turnLock = true;
         if(isNext){
-            this.turnNextPage(page1,page2,0);
+            var initPos = moveX||0;
+            this.turnNextPage(page1,page2,initPos);
         }else{
-            this.turnPrePage(page1,page2,-this.width);
+            var initPos = moveX||-this.width;
+            this.turnPrePage(page1,page2,initPos);
         }
     },
     turnNextPage:function(currentPage,nextPage,moveX){
@@ -83,7 +85,10 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
     dragNextPage:function(moveX){
         var textArt = this.currentTextArt;
         var currentPage = textArt.getCurrentPage();
-        var nextPage = textArt.getNextPage()
+        var nextPage = textArt.getNextPage();
+        if(nextPage==null){
+            return;
+        }
         this.drawPage(nextPage);
         this.drawPage(currentPage,moveX);
 
@@ -91,7 +96,10 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
     dragPrePage:function(moveX){
         var textArt = this.currentTextArt;
         var currentPage = textArt.getCurrentPage();
-        var prePage = textArt.getNextPage()
+        var prePage = textArt.getPrePage();
+        if(prePage==null){
+            return;
+        }
         this.drawPage(currentPage);
         this.drawPage(prePage,moveX);
     },
@@ -151,19 +159,34 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
                 x:touch.pageX,
                 y:touch.pageY
             }
-
+            var x = touch.pageX;
             if(isClick){
-                var x = touch.pageX;
                 if(x>_this.width*0.66){
                     _this.drawNextPage();
                 }else if(x<_this.width/3){
                     _this.drawPrePage();
                 }
             }else{
+                var textArt = _this.currentTextArt;
+                var moveX = x-_this.width;
                 if(isTurnNext){
-
+                    if(x>_this.width/2){
+                        //回到原来的位置
+                        textArt.movePage(1);
+                        _this.drawPrePage(moveX);
+                    }else{
+                        //继续翻页
+                        _this.drawNextPage(moveX);
+                    }
                 }else{
-
+                    if(x>_this.width/2){
+                        //继续翻页
+                        _this.drawPrePage(moveX);
+                    }else{
+                        //回到原来的位置
+                        textArt.movePage(-1);
+                        _this.drawNextPage(moveX);
+                    }
                 }
             }
 
