@@ -1,14 +1,20 @@
 "use strict";
 var HClass = require('./HClass');
 var TextPage = HClass.extend({
-    textLines:[],
+    textLines:null,
     pageIndex:0,
+    ctor:function(){
+        this.textLines=[];
+    },
     addTextLine:function(textLine){
         textLine.setLine(this.textLines.length);
         this.textLines.push(textLine);
     },
     setPage:function(pageIndex){
         this.pageIndex = pageIndex;
+    },
+    getTextLines:function(){
+        return this.textLines;
     },
     getTextLine:function(index){
         if(index<0){

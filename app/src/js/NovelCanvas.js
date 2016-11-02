@@ -19,8 +19,9 @@
 }(typeof window !== "undefined" ? window : this, function() {
     "use strict";
 
-    var canvasUtil = require('./util/NovelCanvasUtil.js');
-
+//    var CanvasUtil = require('./classes/NovelCanvasUtil.js');
+    var CanvasUtil = require('./classes/NormalCanvasUtil.js');
+    var canvasUtil=null;
     var myCanvas = {
         canvasFrame:null,
         canvas:null,
@@ -46,19 +47,36 @@
             });
             this.canvas.attr("width",this.options.width);
             this.canvas.attr("height",this.options.height);
-            canvasUtil.init(this.canvas);
+            canvasUtil = new CanvasUtil(this.canvas);
         },
         initArticle:function(){
-            this.setArticle("我是你大爷我是你大爷\n\n\n我是你大爷我是你大爷我是你大爷");
+//            this.setArticle("我是你大爷我是你大");
         },
         setArticle:function(text){
             canvasUtil.drawArt(text);
+        },
+        next:function(){
+            //向后翻
+            canvasUtil.drawNextPage();
+        },
+        pre:function(){
+            //向前翻
+            canvasUtil.drawPrePage();
         }
     };
 
     return {
         init:function(options){
             myCanvas.init(options);
+        },
+        setArticle:function(text){
+            myCanvas.setArticle(text);
+        },
+        next:function(){
+            myCanvas.next();
+        },
+        pre:function(){
+            myCanvas.pre();
         }
     }
 

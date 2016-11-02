@@ -10,7 +10,7 @@ var TextLine = HClass.extend({
         this.lineHeight = lineHeight;
     },
     setLine:function(lineIndex){
-        this.y = lineIndex * this.lineHeight;
+        this.y = (lineIndex+1) * this.lineHeight;
     }
 });
 module.exports = TextLine;
