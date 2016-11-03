@@ -21,13 +21,15 @@
 
 //    var CanvasUtil = require('./classes/NovelCanvasUtil.js');
     var CanvasUtil = require('./classes/NormalCanvasUtil.js');
+    var EmulateCanvasUtil = require('./classes/EmulateCanvasUtil.js');
     var canvasUtil=null;
     var myCanvas = {
         canvasFrame:null,
         canvas:null,
         options:{
             width:375,
-            height:600
+            height:600,
+            bgUrl:null
         },
         init:function(options){
             $.extend(this.options,options);
@@ -47,7 +49,8 @@
             });
             this.canvas.attr("width",this.options.width);
             this.canvas.attr("height",this.options.height);
-            canvasUtil = new CanvasUtil(this.canvas);
+//            canvasUtil = new CanvasUtil(this.canvas,this.options);
+            canvasUtil = new EmulateCanvasUtil(this.canvas,this.options);
         },
         initArticle:function(){
 //            this.setArticle("我是你大爷我是你大");

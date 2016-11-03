@@ -11,17 +11,55 @@ var CanvasUtil = HClass.extend({
     currentTextArt:null,
     bufferCanvas:null,
     bctx:null,
-    ctor:function($canvas){
-        this.init($canvas);
+    bg:null,
+    bgBox:null,//截取背景显示区域
+
+    ctor:function($canvas,settings){
+        this.init($canvas,settings);
     },
-    init:function($canvas){
+    init:function($canvas,settings){
         this.canvas = $canvas[0];
         this.ctx = this.canvas.getContext("2d");
         this.width = this.canvas.width;
         this.height = this.canvas.height;
         this.initBufferCanvas();
-        this.setFont();
+
         SplitArtUtil.init(this);
+        this.initSetting(settings);
+    },
+    initSetting:function(settings){
+        this.setFont(settings["fontSize"],settings["family"],settings["fontColor"]);
+        var bgUrl = settings["bgUrl"];
+        this.initBg(bgUrl);
+    },
+    initBg:function(bgUrl){
+        if(bgUrl){
+            var $img = $('<img src="'+bgUrl+'"/>');
+            var _this = this;
+            $img.on('load',function(){
+                var bg = _this.bg = $img[0];
+                var width = bg.width;
+                var height = bg.height;
+                var cWidth = _this.width;
+                var cHeight = _this.height;
+
+                var tempHeight = width/cWidth*cHeight;
+                var boxWidth=0,boxHeight=0;
+                if(tempHeight<height){
+                    boxHeight = tempHeight
+                    boxWidth = width;
+                }else{
+                    boxHeight = height;
+                    boxWidth = height/cHeight*cWidth;
+                }
+                _this.bgBox={
+                    x:0,y:0,
+                    width:boxWidth,
+                    height:boxHeight
+                }
+                _this.drawCurrentPage();
+            });
+        }
     },
     initBufferCanvas:function(){
         var bufferCanvasDom = $("<canvas></canvas>");
@@ -30,10 +68,11 @@ var CanvasUtil = HClass.extend({
         bufferCanvasDom.attr('height',this.height);
         this.bctx = this.bufferCanvas.getContext("2d");
     },
-    setFont:function(font,family){
+    setFont:function(font,family,color){
         var ctx = this.bctx;
         this.fontSize = font||18;
         this.fontFamilay = family||'arial';
+        ctx.fillStyle=color||"#000";
         ctx.font=this.fontSize+"px "+this.fontFamilay;
     },
     drawArt:function(text){
@@ -49,9 +88,11 @@ var CanvasUtil = HClass.extend({
     },
     drawCurrentPage:function(){
         var textArt = this.currentTextArt;
-        var textPage = textArt.getCurrentPage();
-        if(textPage!=null) {
-            this.drawPage(textPage);
+        if(textArt){
+            var textPage = textArt.getCurrentPage();
+            if(textPage!=null) {
+                this.drawPage(textPage);
+            }
         }
     },
     drawNextPage:function(){
@@ -101,6 +142,14 @@ var CanvasUtil = HClass.extend({
         ctx.save();
         ctx.fillStyle="#ffffff";
         ctx.fillRect(0,0,this.width,this.height);
+        if(this.bg){//如果有bg就绘制背景
+            ctx.globalAlpha=0.7;
+            var sx = this.bgBox.x;
+            var sy = this.bgBox.y;
+            var swidth = this.bgBox.width;
+            var sheight = this.bgBox.height;
+            ctx.drawImage(this.bg,sx,sy,swidth,sheight,0,0,this.width,this.height);
+        }
         ctx.restore();
     },
     drawText:function(text,x,y){

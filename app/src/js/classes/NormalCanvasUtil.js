@@ -5,8 +5,8 @@
 var NovelCanvasUtil = require('./NovelCanvasUtil');
 var NormalCanvasUtil = NovelCanvasUtil.extend({
     turnLock:false,
-    init:function($canvas){
-        this._super($canvas);
+    init:function($canvas,settings){
+        this._super($canvas,settings);
         this.initListener();
     },
     drawNextPage:function(moveX){
@@ -148,7 +148,6 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
                     _this.dragPrePage(touchCurrent.x-_this.width);
                 }
             }
-
             e.stopPropagation();
             e.preventDefault();
         },false);
@@ -189,9 +188,6 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
                     }
                 }
             }
-
-
-
             e.stopPropagation();
             e.preventDefault();
             isClick = true;
