@@ -35,6 +35,12 @@ var MathUtil = {
         }
         return this.p((b1*c2-b2*c1)/(a1*b2-a2*b1),(a2*c1-a1*c2)/(a1*b2-a2*b1));
     },
+    giveMeQuadraticPByT:function(p0,p1,p2,t){
+        var a = (1-t)*(1-t);
+        var b = 2*t*(1-t);
+        var c = t*t;
+        return this.p(p0.x*a+p1.x*b+p2.x*c,p0.y*a+p1.y*b+p2.y*c);
+    },
     giveMeDisPP:function(p1,p2){
         var disX = p2.x-p1.x;
         var disY = p2.y-p1.y;
@@ -48,6 +54,9 @@ var MathUtil = {
         var y1 = p1.y;
         var y2 = p2.y
         return this.p((x1+n*x2)/(1+n),(y1+n*y2)/(1+n));
+    },
+    giveMeMidPByPPP:function(p1,p2,p3){
+        return this.p((p1.x+p2.x+p3.x)/3,(p1.y+p2.y+p3.y)/3);
     },
     p:function(x,y){
         return {
