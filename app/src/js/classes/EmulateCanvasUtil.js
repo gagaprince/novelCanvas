@@ -22,7 +22,7 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
     drawPrePageUpPoint:function(p){
 
     },
-    drawPrePageBottomPoint:function(p){
+    drawPrePageBottomPoint:function(p,page1,page2){
         //需要找出9个关键点
         var ur = mu.p(this.width,0);
         var bl = mu.p(0,this.height);
@@ -36,8 +36,6 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         var mp = mu.giveMePByPPK(br,p,0.5);
         //计算mp 和 p的0.25点
         var mmp = mu.giveMePByPPK(p,mp,0.5);
-        console.log("mmp");
-        console.log(mmp);
         //计算brp直线的方程 使用两点式
         var lbrp = mu.createLineFunByPP(p,br);
         //计算mp与prp垂直直线的方程 使用斜截式
@@ -68,13 +66,13 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         //九个关键点
         //p mmbp mbp mmup midBp mmrp mmlp mrp midRp
         this.clearDisk();
-        this.drawUpPage(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp);
-        this.drawDownPage(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp);
+        this.drawUpPage(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp,page1);
+        this.drawDownPage(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp,page2);
         this.drawbgPage(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp);
 
     },
     //绘制上面一页
-    drawUpPage:function(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp){
+    drawUpPage:function(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp,page){
         var ctx = this.bctx;
         ctx.save();
         ctx.beginPath();
@@ -88,11 +86,12 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         ctx.lineTo(0,this.height);
         ctx.closePath();
         ctx.clip();
-        this.drawCurrentPage(true);
+//        this.drawCurrentPage(true);
+        this.drawPage(page);
         ctx.restore();
         this.repaint();
     },
-    drawDownPage:function(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp){
+    drawDownPage:function(p, mmbp, mbp, mmup, midBp, mmrp, mmlp, mrp, midRp,page){
         var ctx = this.bctx;
         ctx.save();
         ctx.beginPath();
@@ -116,9 +115,27 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         ctx.lineTo(midRp.x,midRp.y);
         ctx.closePath();
         ctx.clip();
+        //画底部内容
         var textArt = this.currentTextArt;
         textArt.movePage(1);
-        this.drawCurrentPage(true);
+//        this.drawCurrentPage(true);
+        this.drawPage(page);
+        //在画一层阴影
+        ctx.beginPath();
+        ctx.moveTo(mmrp.x,mmrp.y);
+        ctx.lineTo(midRp.x,midRp.y);
+        ctx.lineTo(midBp.x,midBp.y);
+        ctx.lineTo(mmbp.x,mmbp.y);
+        ctx.lineTo(p.x,p.y);
+        ctx.closePath();
+
+        ctx.fillStyle = 'rgba(0, 0, 0,0.8)';
+        ctx.shadowOffsetX = 15; // 阴影Y轴偏移
+        ctx.shadowOffsetY = 15; // 阴影X轴偏移
+        ctx.shadowBlur = 14; // 模糊尺寸
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'; // 颜色
+        ctx.fill();
+
         ctx.restore();
         this.repaint();
     },
@@ -144,7 +161,17 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         ctx.lineTo(0,this.height);
         ctx.closePath();
         ctx.clip();
-        ctx.stroke();
+
+        var mp = mu.giveMePByPPK(mu.p(this.width,this.height),p,0.5);
+        var grd=ctx.createLinearGradient(p.x,p.y,mp.x,mp.y);
+        grd.addColorStop(0,"#999999");
+        grd.addColorStop(0.4,"#aaaaaa");
+        grd.addColorStop(0.6,"#dddddd");
+        grd.addColorStop(1,"#666666");
+        ctx.fillStyle=grd;
+        ctx.globalAlpha=0.7;
+
+        ctx.fill();
         ctx.restore();
         this.repaint();
     },
@@ -173,19 +200,45 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         this.repaint();
     },
 
+    dragNextPage:function(moveX){
+        var textArt = this.currentTextArt;
+        var currentPage = textArt.getCurrentPage();
+        var nextPage = textArt.getNextPage();
+        if(nextPage==null){
+            return;
+        }
+        this.drawPage(nextPage);
+        this.drawPage(currentPage,moveX);
+
+    },
+    dragPrePage:function(moveX){
+        var textArt = this.currentTextArt;
+        var currentPage = textArt.getCurrentPage();
+        var prePage = textArt.getPrePage();
+        if(prePage==null){
+            return;
+        }
+        this.drawPage(currentPage);
+        this.drawPage(prePage,moveX);
+    },
+
     initListener:function(){
         var canvas = this.canvas;
         var _this = this;
         var touchStart={};
         var touchCurrent = {};
         var touchEnd = {};
+
+        var isClick = true;
+        var isTurnNext = true;
+
         canvas.addEventListener("touchstart",function(e){
             var touch = e.touches[0];
             touchStart={
                 x:touch.pageX,
                 y:touch.pageY
             }
-            _this.drawPrePageByPoint(touchStart);
+
             e.stopPropagation();
             e.preventDefault();
         },false);
@@ -196,6 +249,29 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
                 y:touch.pageY
             }
 
+            var disX = touchCurrent.x-touchStart.x;
+            if(disX>10||disX<-10){
+                if(isClick){
+                    if(disX>10){
+                        isTurnNext = false;
+                    }else{
+                        isTurnNext = true;
+                    }
+                }
+                isClick=false;
+            }
+            if(!isClick){
+                //页面随动
+                if(isTurnNext){
+                    //向后翻页
+                    _this.dragNextPage(touchCurrent.x);
+                }else{
+                    //向前翻页
+                    _this.dragPrePage(touchCurrent.x);
+                }
+            }
+
+            _this.drawPrePageByPoint(touchStart);
             e.stopPropagation();
             e.preventDefault();
         },false);
