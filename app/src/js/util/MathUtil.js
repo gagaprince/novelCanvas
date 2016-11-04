@@ -58,6 +58,18 @@ var MathUtil = {
     giveMeMidPByPPP:function(p1,p2,p3){
         return this.p((p1.x+p2.x+p3.x)/3,(p1.y+p2.y+p3.y)/3);
     },
+    createTweenFun:function(p1,p2,dis){
+        var step=0;
+        var dk = dis/this.giveMeDisPP(p1,p2);
+        var _this = this;
+        return function(){
+            var p = _this.giveMePByPPK(p1,p2,dk*(step++));
+            if(_this.giveMeDisPP(p2,p)<dis){
+                return null;
+            }
+            return p;
+        }
+    },
     p:function(x,y){
         return {
             x:x,

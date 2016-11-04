@@ -5,18 +5,19 @@
 var NovelCanvasUtil = require('./NovelCanvasUtil');
 var mu = require('../util/MathUtil');
 var EmulateCanvasUtil = NovelCanvasUtil.extend({
+    turnLock:false,
     init:function($canvas,settings){
         this._super($canvas,settings);
         this.initListener();
     },
-    drawPrePageByPoint:function(point){
+    drawPrePageByPoint:function(point,page1,page2){
         var y = point.y;
         if(y>this.height/2){
             //点在下方
-            this.drawPrePageBottomPoint(point);
+            this.drawPrePageBottomPoint(point,page1,page2);
         }else{
             //点在上方
-            this.drawPrePageUpPoint(point);
+            this.drawPrePageUpPoint(point,page1,page2);
         }
     },
     drawPrePageUpPoint:function(p){
@@ -117,7 +118,6 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         ctx.clip();
         //画底部内容
         var textArt = this.currentTextArt;
-        textArt.movePage(1);
 //        this.drawCurrentPage(true);
         this.drawPage(page);
         //在画一层阴影
@@ -187,10 +187,7 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
             }
         }
     },
-    drawPage:function(textPage,moveX){
-        if(!moveX){
-            moveX=0;
-        }
+    drawPage:function(textPage){
         var ctx = this.bctx;
         var textLines = textPage.getTextLines();
         for(var i=0;i<textLines.length;i++){
@@ -200,28 +197,89 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         this.repaint();
     },
 
-    dragNextPage:function(moveX){
+    dragNextPage:function(touchP){
         var textArt = this.currentTextArt;
         var currentPage = textArt.getCurrentPage();
         var nextPage = textArt.getNextPage();
         if(nextPage==null){
             return;
         }
-        this.drawPage(nextPage);
-        this.drawPage(currentPage,moveX);
+        this.drawPrePageBottomPoint(touchP,currentPage,nextPage);
 
     },
-    dragPrePage:function(moveX){
+    dragPrePage:function(touchP){
         var textArt = this.currentTextArt;
         var currentPage = textArt.getCurrentPage();
         var prePage = textArt.getPrePage();
         if(prePage==null){
             return;
         }
-        this.drawPage(currentPage);
-        this.drawPage(prePage,moveX);
+        this.drawPrePageBottomPoint(touchP,prePage,currentPage);
     },
-
+    drawNextPage:function(touchP){
+        //沿当前点到左下点的连线移动
+        if(this.turnLock){
+            return;
+        }
+        var textArt = this.currentTextArt;
+        var currentPage = textArt.getCurrentPage();
+        var nextPage = textArt.getNextPage();
+        if(currentPage==nextPage){//说明是第一张或者最后一张 直接画
+            this.drawPage(nextPage);
+        }else if(nextPage!=null){
+            this.startEmulateTurnPage(currentPage,nextPage,true,touchP);
+        }else{
+            //发出已经到最后一页的广播
+        }
+    },
+    drawPrePage:function(touchP){
+        //沿当前点到右下点的连线移动
+        if(this.turnLock){
+            return;
+        }
+        var textArt = this.currentTextArt;
+        var currentPage = textArt.getCurrentPage();
+        var prePage = textArt.getPrePage();
+        if(currentPage==prePage){//说明是第一张或者最后一张 直接画
+            this.drawPage(prePage);
+        }else if(prePage!=null){
+            this.startEmulateTurnPage(prePage,currentPage,false,touchP);
+        }else{
+            //发出已经到第一页的广播
+        }
+    },
+    startEmulateTurnPage:function(page1,page2,isNext,touchP){
+        if(this.turnLock){
+            return;
+        }
+        this.turnLock = true;
+        if(isNext){
+            var tweenFun = mu.createTweenFun(touchP,mu.p(-this.width,this.height),20);
+            this.turnPage(page1,page2,isNext,tweenFun);
+        }else{
+            var tweenFun = mu.createTweenFun(touchP,mu.p(this.width,this.height),20);
+            this.turnPage(page1,page2,isNext,tweenFun);
+        }
+    },
+    turnPage:function(page1,page2,isNext,tweenFun){//touchP为初始点 currentP为当前位置
+        var desP = tweenFun();
+        if(desP==null){
+            var textArt = this.currentTextArt;
+            if(isNext){
+                textArt.movePage(1);
+            }else{
+                textArt.movePage(-1);
+            }
+            this.turnLock = false;
+            this.drawCurrentPage();
+        }else{
+            this.drawPrePageBottomPoint(desP,page1,page2);
+            var _this = this;
+            setTimeout(function(){
+                _this.turnPage(page1,page2,isNext,tweenFun);
+            },10);
+        }
+    },
     initListener:function(){
         var canvas = this.canvas;
         var _this = this;
@@ -264,14 +322,13 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
                 //页面随动
                 if(isTurnNext){
                     //向后翻页
-                    _this.dragNextPage(touchCurrent.x);
+                    _this.dragNextPage(touchCurrent);
                 }else{
                     //向前翻页
-                    _this.dragPrePage(touchCurrent.x);
+                    _this.dragPrePage(touchCurrent);
                 }
             }
-
-            _this.drawPrePageByPoint(touchStart);
+//            _this.drawPrePageByPoint(touchStart);
             e.stopPropagation();
             e.preventDefault();
         },false);
@@ -282,9 +339,40 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
                 x:touch.pageX,
                 y:touch.pageY
             }
+            var x = touch.pageX;
+            if(isClick){
+                if(x>_this.width*0.66){
+                    _this.drawNextPage(touchEnd);
+                }else if(x<_this.width/3){
+                    _this.drawPrePage(touchEnd);
+                }
+            }else{
+                var textArt = _this.currentTextArt;
+                var moveX = x-_this.width;
+                if(isTurnNext){
+                    if(x>_this.width/2){
+                        //回到原来的位置
+                        textArt.movePage(1);
+                        _this.drawPrePage(touchEnd);
+                    }else{
+                        //继续翻页
+                        _this.drawNextPage(touchEnd);
+                    }
+                }else{
+                    if(x>_this.width/2){
+                        //继续翻页
+                        _this.drawPrePage(touchEnd);
+                    }else{
+                        //回到原来的位置
+                        textArt.movePage(-1);
+                        _this.drawNextPage(touchEnd);
+                    }
+                }
+            }
 
             e.stopPropagation();
             e.preventDefault();
+            isClick = true;
             touchStart={};
             touchCurrent={};
             touchEnd = {};
