@@ -3,28 +3,34 @@ var SplitArtUtil = require('./../util/SplitArtUtil');
 var TextArt = require('./TextArt');
 //这是一个种组合形式的
 var ArtProvider = TextArt.extend({
-    needArtByIndex:null,
-    currentIndex:0,
+    needArtByIndex:null,//外部传入的请求数据的函数
+    initIndex:0,
     preArt:null,
     currentArt:null,
     nextArt:null,
+    initReady:null,
     ctor:function(options){
         this.needArtByIndex = options.needArtByIndex;
-        this.currentIndex = options.currentIndex;
+        this.initIndex = options.initIndex;
+        this.initReady = options.initReady;
+        this.init();
     },
     init:function(){
         this.textPages = [];
         //会初始化当前art 下一个art  上一个art
         if(this.needArtByIndex){
-            var currentIndex = this.currentIndex;
+            var currentIndex = this.initIndex;
             var _this = this;
-            this.needArtByIndex(this.currentIndex,function(text){
+            this.needArtByIndex(this.initIndex,function(text){
                //初始化当前页面
                 var textArt = SplitArtUtil.splitArt(text,currentIndex);
                 _this.currentArt = textArt;
                 _this.pushAllPageIn(textArt);
-                _this.getNextArt();
-                _this.getPreArt();
+                _this.getNextArt(textArt);
+                _this.getPreArt(textArt);
+                if(_this.initReady){
+                    _this.initReady();
+                }
             });
         }else{
             throw "needArtByIndx function is undefined ！";
@@ -32,10 +38,13 @@ var ArtProvider = TextArt.extend({
 
     },
     //获取前一个章节
-    getNextArt:function(){
+    getNextArt:function(currentArt){
         var _this = this;
-        var currentIndex = this.currentIndex;
-        this.needArtByIndex(this.currentIndex,function(text){
+        var currentIndex = currentArt.getArtIndex();
+
+        console.log("请求第"+(currentIndex+1)+"页数据");
+        this.nextArt=null;
+        this.needArtByIndex(currentIndex+1,function(text){
             //初始化当前页面
             var textArt = SplitArtUtil.splitArt(text,currentIndex+1);
             _this.nextArt = textArt
@@ -43,14 +52,18 @@ var ArtProvider = TextArt.extend({
         });
     },
     //获取后一个章节
-    getPreArt:function(){
+    getPreArt:function(currentArt){
         var _this = this;
-        var currentIndex = this.currentIndex;
-        this.needArtByIndex(this.currentIndex,function(text){
+        var currentIndex = currentArt.getArtIndex();
+
+        console.log("请求第"+(currentIndex-1)+"页数据");
+        this.preArt=null;
+        this.needArtByIndex(currentIndex-1,function(text){
             //初始化当前页面
             var textArt = SplitArtUtil.splitArt(text,currentIndex-1);
             _this.preArt = textArt
             _this.pushAllPageIn(textArt,true);
+            console.log(_this);
         });
     },
     pushAllPageIn:function(art,isBefore){//是否从前面插入
@@ -67,21 +80,67 @@ var ArtProvider = TextArt.extend({
             }
         }
     },
-    moveNextPage:function(){
-        var currentArt = this.currentArt;
-        if(currentArt.getNextPage()!=null){
-            currentArt.movePage(1);
-        }else{
-            //切换currentArt
-            this.currentArt = this.nextArt;
-            this.getNextArt();
+    removeFirstArtPage:function(){
+        var preArt = this.preArt;
+        for(var i=0;i<preArt.size();i++){
+            this.textPages.shift();
+        }
+        this.currentPage = this.currentPage-preArt.size();
+    },
+    removeLastArtPage:function(){
+        var nextArt = this.nextArt;
+        for(var i=0;i<nextArt.size();i++){
+            this.textPages.pop();
         }
 
     },
-    movePrePage:function(){},
-    getCurrentPage:function(){},
-    getNextPage:function(){},
-    getPrePage:function(){}
+    movePage:function(step){
+        var currentPage = this.currentPage;
+        this._super(step);
+        //检测是否跨越章节
+        var newCurrentPage = this.currentPage;
+        if(this.preArt!=null){
+            var preArtLength = this.preArt.size();
+        }else{
+            var preArtLength = 0;
+        }
+        var currentArtLength = this.currentArt.size();
+        var preCurrentLength = currentArtLength+preArtLength;
+        if(newCurrentPage<preArtLength){
+            //向前触动翻章节
+            this.preparedPreArt();
+        }else if(newCurrentPage>=preCurrentLength){
+            //向后翻动章节
+            this.preparedNextArt();
+        }
+
+    },
+    preparedPreArt:function(){
+        //请求之前的章节
+        var preArt = this.preArt;
+        if(preArt==null||preArt.size()==0){
+            //不必做移除操作 直接请求
+        }else{
+            //移除nextArt数据
+            //将preArt赋值给currentArt
+            this.removeLastArtPage();
+            this.nextArt = this.currentArt;
+            this.currentArt = this.preArt;
+        }
+        this.getPreArt(this.currentArt);
+        //请求preArt
+    },
+    preparedNextArt:function(){
+        var nextArt = this.nextArt;
+        if(nextArt==null||nextArt.size()==0){
+
+        }else{
+            this.removeFirstArtPage();
+            this.preArt = this.currentArt;
+            this.currentArt = this.nextArt;
+        }
+        this.getNextArt(this.currentArt);
+    }
 
 });
 module.exports = ArtProvider;

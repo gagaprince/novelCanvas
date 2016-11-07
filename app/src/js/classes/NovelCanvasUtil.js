@@ -75,15 +75,14 @@ var CanvasUtil = HClass.extend({
         ctx.fillStyle=color||"#000";
         ctx.font=this.fontSize+"px "+this.fontFamilay;
     },
-    drawArt:function(text,artIndex){
-        var textArt = SplitArtUtil.splitArt(text,artIndex);
+    drawArt:function(textArt){
+        //var textArt = SplitArtUtil.splitArt(text,artIndex);
         this.currentTextArt = textArt;
         /*var ctx = this.ctx;
         var length = Math.floor(this.width/this.fontSize);
         var txt = text.substring(0,length);
         var box = ctx.measureText(txt);
         this.drawText(txt,0,this.fontSize);*/
-        console.log(textArt);
         this.drawCurrentPage();
     },
     drawCurrentPage:function(){
@@ -99,7 +98,6 @@ var CanvasUtil = HClass.extend({
         var textArt = this.currentTextArt;
         var textPage = textArt.getNextPage();
         if(textPage!=null){
-            console.log(textPage);
             this.drawPage(textPage);
         }else{
             //发出已经到最后一页的广播

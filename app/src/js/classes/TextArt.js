@@ -4,9 +4,17 @@ var TextArt = HClass.extend({
     textPages:null,
     allText:"",
     currentPage:0,
-    ctor:function(text){
+    artIndex:0,
+    ctor:function(text,artIndex){
         this.allText = text;
         this.textPages=[];
+        this.artIndex = artIndex;
+    },
+    getArtIndex:function(){
+        return this.artIndex;
+    },
+    size:function(){
+        return this.textPages.length;
     },
     getPageList:function(){
         return this.textPages;
@@ -34,6 +42,12 @@ var TextArt = HClass.extend({
     },
     movePage:function(step){
         this.currentPage = this.currentPage+step;
+        if(this.currentPage<0){
+            this.currentPage=0;
+        }
+        if(this.currentPage>=this.textPages.length){
+            this.currentPage = this.textPages.length-1;
+        }
     },
     getTextPage:function(index){
         if(index<0){

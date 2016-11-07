@@ -22,7 +22,9 @@
 //    var CanvasUtil = require('./classes/NovelCanvasUtil.js');
     var CanvasUtil = require('./classes/NormalCanvasUtil.js');
     var EmulateCanvasUtil = require('./classes/EmulateCanvasUtil.js');
+    var ArtProvider = require('./classes/ArtProvider.js');
     var canvasUtil=null;
+    var artProvider = null;
     var myCanvas = {
         canvasFrame:null,
         canvas:null,
@@ -35,7 +37,7 @@
             $.extend(this.options,options);
             this.initDom();
             this.initCanvas();
-            this.initArticle();
+            this.initArtProvider();
         },
         initDom:function(){
             this.canvasFrame = $("#novelCanvasFrame");
@@ -52,12 +54,18 @@
 //            canvasUtil = new CanvasUtil(this.canvas,this.options);
             canvasUtil = new EmulateCanvasUtil(this.canvas,this.options);
         },
-        initArticle:function(){
-//            this.setArticle("我是你大爷我是你大");
-        },
-        setArticle:function(text,artIndex){
-            this.currentArtIndex = artIndex;
-            canvasUtil.drawArt(text,artIndex);
+        initArtProvider:function(){
+            var pullData = this.options.pullData;
+            ArtProvider = new ArtProvider({
+                needArtByIndex:pullData,
+                initIndex:0,
+                initReady:function(){
+                    console.log("artProvider ready");
+                    setTimeout(function(){
+                        canvasUtil.drawArt(ArtProvider);
+                    });
+                }
+            });
         },
         next:function(){
             //向后翻
@@ -72,9 +80,6 @@
     return {
         init:function(options){
             myCanvas.init(options);
-        },
-        setArticle:function(text,currentArtPage){
-            myCanvas.setArticle(text,currentArtPage);
         },
         next:function(){
             myCanvas.next();

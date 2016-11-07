@@ -15,9 +15,9 @@ var SplitArtUtil={
         this.lineHeight = options.fontSize+4;
         this.ctx = options.bctx;//取缓冲屏的画笔
     },
-    splitArt:function(text){
+    splitArt:function(text,artIndex){
         text = this.replace(text);
-        var textArt = new TextArt(text);
+        var textArt = new TextArt(text,artIndex);
         var textSY = text;
         while(textSY.length>0){
             textSY = this.splitPage(textArt,textSY);
@@ -30,7 +30,6 @@ var SplitArtUtil={
     splitPage:function(textArt,textSY){
         var pageHeight = this.height;
         var lineHeight = this.lineHeight;
-        console.log(lineHeight);
         var lines = Math.floor(pageHeight/lineHeight);
         var textPage = new TextPage();
         for(var i=0;i<lines;i++){
