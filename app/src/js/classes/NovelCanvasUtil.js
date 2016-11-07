@@ -75,8 +75,8 @@ var CanvasUtil = HClass.extend({
         ctx.fillStyle=color||"#000";
         ctx.font=this.fontSize+"px "+this.fontFamilay;
     },
-    drawArt:function(text){
-        var textArt = SplitArtUtil.splitArt(text);
+    drawArt:function(text,artIndex){
+        var textArt = SplitArtUtil.splitArt(text,artIndex);
         this.currentTextArt = textArt;
         /*var ctx = this.ctx;
         var length = Math.floor(this.width/this.fontSize);

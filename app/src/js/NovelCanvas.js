@@ -55,8 +55,9 @@
         initArticle:function(){
 //            this.setArticle("我是你大爷我是你大");
         },
-        setArticle:function(text){
-            canvasUtil.drawArt(text);
+        setArticle:function(text,artIndex){
+            this.currentArtIndex = artIndex;
+            canvasUtil.drawArt(text,artIndex);
         },
         next:function(){
             //向后翻
@@ -72,8 +73,8 @@
         init:function(options){
             myCanvas.init(options);
         },
-        setArticle:function(text){
-            myCanvas.setArticle(text);
+        setArticle:function(text,currentArtPage){
+            myCanvas.setArticle(text,currentArtPage);
         },
         next:function(){
             myCanvas.next();

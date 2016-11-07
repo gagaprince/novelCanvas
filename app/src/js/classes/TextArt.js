@@ -8,6 +8,9 @@ var TextArt = HClass.extend({
         this.allText = text;
         this.textPages=[];
     },
+    getPageList:function(){
+        return this.textPages;
+    },
     addTextPage:function(textPage){
         textPage.setPage(this.textPages.length);
         this.textPages.push(textPage);
