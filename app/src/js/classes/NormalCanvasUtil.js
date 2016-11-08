@@ -4,7 +4,7 @@
  * */
 
 var raf = (function(){
-    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {window.setTimeout(callback, 1000 / 60); };
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {window.setTimeout(callback, 1000 / 100); };
 })();
 var start,end;
 var NovelCanvasUtil = require('./NovelCanvasUtil');
@@ -71,7 +71,7 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
             this.drawPage(currentPage,moveX);
             var _this = this;
             raf(function(){
-                _this.turnNextPage(currentPage,nextPage,moveX-60);
+                _this.turnNextPage(currentPage,nextPage,moveX-80);
             });
 //            setTimeout(function(){
 //                _this.turnNextPage(currentPage,nextPage,moveX-20);
@@ -90,7 +90,7 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
             this.drawPage(prePage,moveX);
             var _this = this;
             raf(function(){
-                _this.turnPrePage(prePage,currentPage,moveX+60);
+                _this.turnPrePage(prePage,currentPage,moveX+80);
             });
 //            setTimeout(function(){
 //                _this.turnPrePage(prePage,currentPage,moveX+20);

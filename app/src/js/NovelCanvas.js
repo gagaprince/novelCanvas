@@ -32,7 +32,9 @@
             width:375,
             height:600,
             bgUrl:null,
-            scale:1
+            scale:1,
+            lineHeight:20,
+            rect:{}
         },
         init:function(options){
             $.extend(this.options,options);

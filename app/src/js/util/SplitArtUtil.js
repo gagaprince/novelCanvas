@@ -8,11 +8,18 @@ var SplitArtUtil={
     lineHeight:0,
     fontSize:0,
     ctx:null,
+    rect:{
+        top:0,
+        left:0,
+        right:0,
+        bottom:0
+    },
     init:function(options){
         this.width = options.width;
         this.height = options.height;
         this.fontSize = options.fontSize||1;
-        this.lineHeight = options.fontSize+4;
+        this.lineHeight = options.lineHeight;
+        this.rect = options.rect||this.rect;
         this.ctx = options.bctx;//取缓冲屏的画笔
     },
     splitArt:function(text,artIndex){
@@ -28,7 +35,8 @@ var SplitArtUtil={
         return text.replace(/<br\/>/g,'\n');
     },
     splitPage:function(textArt,textSY){
-        var pageHeight = this.height;
+        var rect = this.rect;
+        var pageHeight = this.height-rect.top-rect.bottom;
         var lineHeight = this.lineHeight;
         var lines = Math.floor(pageHeight/lineHeight);
         var textPage = new TextPage();
@@ -42,7 +50,8 @@ var SplitArtUtil={
         return textSY;
     },
     splitLine:function(textPage,textSY){
-        var pageWidth = this.width;
+        var rect = this.rect;
+        var pageWidth = this.width-rect.left-rect.right;
         var fontSize = this.fontSize;
         var ctx = this.ctx;
         var lineNumFloor = Math.floor(pageWidth/fontSize);
@@ -74,7 +83,8 @@ var SplitArtUtil={
                 }
             }
         }
-        var textLine = new TextLine(text,this.lineHeight);
+        var rect = this.rect;
+        var textLine = new TextLine(text,this.lineHeight,rect.left,rect.top);
         textPage.addTextLine(textLine);
         return textSY;
     }

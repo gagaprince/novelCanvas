@@ -5,12 +5,15 @@ var TextLine = HClass.extend({
     y:0,//绘制文字的y起点
     lineHeight:0,
     text:"",//绘制文字的内容
-    ctor:function(text,lineHeight){
+    top:0,
+    ctor:function(text,lineHeight,left,top){
         this.text = text;
         this.lineHeight = lineHeight;
+        this.x = left;
+        this.top=top;
     },
     setLine:function(lineIndex){
-        this.y = (lineIndex+1) * this.lineHeight;
+        this.y = (lineIndex+1) * this.lineHeight+this.top;
     }
 });
 module.exports = TextLine;

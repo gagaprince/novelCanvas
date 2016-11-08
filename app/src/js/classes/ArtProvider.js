@@ -45,10 +45,12 @@ var ArtProvider = TextArt.extend({
         console.log("请求第"+(currentIndex+1)+"页数据");
         this.nextArt=null;
         this.needArtByIndex(currentIndex+1,function(text){
-            //初始化当前页面
-            var textArt = SplitArtUtil.splitArt(text,currentIndex+1);
-            _this.nextArt = textArt
-            _this.pushAllPageIn(textArt);
+            if(_this.nextArt==null){
+                //初始化当前页面
+                var textArt = SplitArtUtil.splitArt(text,currentIndex+1);
+                _this.nextArt = textArt
+                _this.pushAllPageIn(textArt);
+            }
         });
     },
     //获取后一个章节
@@ -59,11 +61,12 @@ var ArtProvider = TextArt.extend({
         console.log("请求第"+(currentIndex-1)+"页数据");
         this.preArt=null;
         this.needArtByIndex(currentIndex-1,function(text){
-            //初始化当前页面
-            var textArt = SplitArtUtil.splitArt(text,currentIndex-1);
-            _this.preArt = textArt
-            _this.pushAllPageIn(textArt,true);
-            console.log(_this);
+            if(_this.preArt==null){
+                //初始化当前页面
+                var textArt = SplitArtUtil.splitArt(text,currentIndex-1);
+                _this.preArt = textArt
+                _this.pushAllPageIn(textArt,true);
+            }
         });
     },
     pushAllPageIn:function(art,isBefore){//是否从前面插入
@@ -82,17 +85,20 @@ var ArtProvider = TextArt.extend({
     },
     removeFirstArtPage:function(){
         var preArt = this.preArt;
-        for(var i=0;i<preArt.size();i++){
-            this.textPages.shift();
+        if(preArt!=null){
+            for(var i=0;i<preArt.size();i++){
+                this.textPages.shift();
+            }
+            this.currentPage = this.currentPage-preArt.size();
         }
-        this.currentPage = this.currentPage-preArt.size();
     },
     removeLastArtPage:function(){
         var nextArt = this.nextArt;
-        for(var i=0;i<nextArt.size();i++){
-            this.textPages.pop();
+        if(nextArt!=null){
+            for(var i=0;i<nextArt.size();i++){
+                this.textPages.pop();
+            }
         }
-
     },
     movePage:function(step){
         var currentPage = this.currentPage;

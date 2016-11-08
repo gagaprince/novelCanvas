@@ -5,6 +5,7 @@ var CanvasUtil = HClass.extend({
     ctx:null,
     canvas:null,
     fontSize:18,
+    lineHeight:20,
     fontFamilay:'arial',
     domWidth:0,
     domHeight:0,
@@ -18,6 +19,7 @@ var CanvasUtil = HClass.extend({
     bctx:null,
     bg:null,
     bgBox:null,//截取背景显示区域
+    rect:{},
 
     ctor:function($canvas,settings){
         this.init($canvas,settings);
@@ -33,7 +35,6 @@ var CanvasUtil = HClass.extend({
         this.scaleX = this.width/this.domWidth;
         this.scaleY = this.height/this.domHeight;
         this.initBufferCanvas();
-
         this.initSetting(settings);
         SplitArtUtil.init(this);
     },
@@ -41,6 +42,8 @@ var CanvasUtil = HClass.extend({
         this.setFont(settings["fontSize"],settings["family"],settings["fontColor"]);
         var bgUrl = settings["bgUrl"];
         this.scale = settings["scale"]||1;
+        this.lineHeight = settings["lineHeight"]||20;
+        this.rect = settings["rect"];
         this.initBg(bgUrl);
     },
     initBg:function(bgUrl){
