@@ -2,6 +2,10 @@
 /**
  * 仿真翻页
  * */
+
+var raf = (function(){
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {window.setTimeout(callback, 1000 / 60); };
+})();
 var NovelCanvasUtil = require('./NovelCanvasUtil');
 var mu = require('../util/MathUtil');
 var EmulateCanvasUtil = NovelCanvasUtil.extend({
@@ -254,10 +258,10 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         }
         this.turnLock = true;
         if(isNext){
-            var tweenFun = mu.createTweenFun(touchP,mu.p(-this.width,this.height),20);
+            var tweenFun = mu.createTweenFun(touchP,mu.p(-this.width,this.height),120);
             this.turnPage(page1,page2,isNext,tweenFun);
         }else{
-            var tweenFun = mu.createTweenFun(touchP,mu.p(this.width,this.height),20);
+            var tweenFun = mu.createTweenFun(touchP,mu.p(this.width,this.height),120);
             this.turnPage(page1,page2,isNext,tweenFun);
         }
     },
@@ -275,9 +279,12 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         }else{
             this.drawPrePageBottomPoint(desP,page1,page2);
             var _this = this;
-            setTimeout(function(){
+            raf(function(){
                 _this.turnPage(page1,page2,isNext,tweenFun);
-            },10);
+            });
+//            setTimeout(function(){
+//                _this.turnPage(page1,page2,isNext,tweenFun);
+//            },10);
         }
     },
     initListener:function(){
@@ -293,8 +300,8 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchstart",function(e){
             var touch = e.touches[0];
             touchStart={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
 
             e.stopPropagation();
@@ -303,8 +310,8 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchmove",function(e){
             var touch = e.touches[0];
             touchCurrent={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
 
             var disX = touchCurrent.x-touchStart.x;
@@ -336,10 +343,10 @@ var EmulateCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchend",function(e){
             var touch = e.changedTouches[0];
             touchEnd={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
-            var x = touch.pageX;
+            var x = touch.pageX*_this.scaleX;
             if(isClick){
                 if(x>_this.width*0.66){
                     _this.drawNextPage(touchEnd);

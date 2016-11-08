@@ -31,7 +31,8 @@
         options:{
             width:375,
             height:600,
-            bgUrl:null
+            bgUrl:null,
+            scale:1
         },
         init:function(options){
             $.extend(this.options,options);
@@ -49,10 +50,13 @@
                 width:this.options.width+'px',
                 height:this.options.height+"px"
             });
-            this.canvas.attr("width",this.options.width);
-            this.canvas.attr("height",this.options.height);
-//            canvasUtil = new CanvasUtil(this.canvas,this.options);
-            canvasUtil = new EmulateCanvasUtil(this.canvas,this.options);
+            this.canvas.attr("width",this.options.width*this.options.scale);
+            this.canvas.attr("height",this.options.height*this.options.scale);
+            if(this.options.turnType==2){
+                canvasUtil = new EmulateCanvasUtil(this.canvas,this.options);
+            }else{
+                canvasUtil = new CanvasUtil(this.canvas,this.options);
+            }
         },
         initArtProvider:function(){
             var pullData = this.options.pullData;

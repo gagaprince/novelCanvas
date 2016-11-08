@@ -6,8 +6,13 @@ var CanvasUtil = HClass.extend({
     canvas:null,
     fontSize:18,
     fontFamilay:'arial',
+    domWidth:0,
+    domHeight:0,
     width:0,
     height:0,
+    scaleX:1,
+    scaleY:1,
+    scale:1,//文字放缩
     currentTextArt:null,
     bufferCanvas:null,
     bctx:null,
@@ -20,16 +25,22 @@ var CanvasUtil = HClass.extend({
     init:function($canvas,settings){
         this.canvas = $canvas[0];
         this.ctx = this.canvas.getContext("2d");
+//        this.ctx.globalCompositeOperation = 'source-atop';
         this.width = this.canvas.width;
         this.height = this.canvas.height;
+        this.domWidth = $canvas.width();
+        this.domHeight = $canvas.height();
+        this.scaleX = this.width/this.domWidth;
+        this.scaleY = this.height/this.domHeight;
         this.initBufferCanvas();
 
-        SplitArtUtil.init(this);
         this.initSetting(settings);
+        SplitArtUtil.init(this);
     },
     initSetting:function(settings){
         this.setFont(settings["fontSize"],settings["family"],settings["fontColor"]);
         var bgUrl = settings["bgUrl"];
+        this.scale = settings["scale"]||1;
         this.initBg(bgUrl);
     },
     initBg:function(bgUrl){
@@ -66,13 +77,21 @@ var CanvasUtil = HClass.extend({
         this.bufferCanvas = bufferCanvasDom[0];
         bufferCanvasDom.attr('width',this.width);
         bufferCanvasDom.attr('height',this.height);
-        this.bctx = this.bufferCanvas.getContext("2d");
+        var ctx = this.bctx = this.bufferCanvas.getContext("2d");
+        //先截取渲染区
+        ctx.moveTo(0,0);
+        ctx.lineTo(0,this.height);
+        ctx.lineTo(this.width,this.height);
+        ctx.lineTo(this.width,0);
+        ctx.lineTo(0,0);
+        ctx.clip();
+//        this.bctx.globalCompositeOperation = 'source-atop';
     },
     setFont:function(font,family,color){
         var ctx = this.bctx;
         this.fontSize = font||18;
-        this.fontFamilay = family||'arial';
-        ctx.fillStyle=color||"#000";
+        this.fontFamilay = family||this.fontFamilay||'arial';
+        ctx.fillStyle=color||ctx.fillStyle||"#000";
         ctx.font=this.fontSize+"px "+this.fontFamilay;
     },
     drawArt:function(textArt){

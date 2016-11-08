@@ -2,6 +2,11 @@
 /**
  * 过渡效果为一般过渡
  * */
+
+var raf = (function(){
+    return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {window.setTimeout(callback, 1000 / 60); };
+})();
+var start,end;
 var NovelCanvasUtil = require('./NovelCanvasUtil');
 var NormalCanvasUtil = NovelCanvasUtil.extend({
     turnLock:false,
@@ -46,7 +51,9 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         this.turnLock = true;
         if(isNext){
             var initPos = moveX||0;
+            start = new Date().getTime();
             this.turnNextPage(page1,page2,initPos);
+
         }else{
             var initPos = moveX||-this.width;
             this.turnPrePage(page1,page2,initPos);
@@ -58,12 +65,17 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
             var textArt = this.currentTextArt;
             textArt.movePage(1);
             this.turnLock = false;
+            end = new Date().getTime();
+            console.log("耗时："+(end-start));
         }else{
             this.drawPage(currentPage,moveX);
             var _this = this;
-            setTimeout(function(){
-                _this.turnNextPage(currentPage,nextPage,moveX-20);
-            },10);
+            raf(function(){
+                _this.turnNextPage(currentPage,nextPage,moveX-60);
+            });
+//            setTimeout(function(){
+//                _this.turnNextPage(currentPage,nextPage,moveX-20);
+//            },10);
         }
 
     },
@@ -77,9 +89,12 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         }else{
             this.drawPage(prePage,moveX);
             var _this = this;
-            setTimeout(function(){
-                _this.turnPrePage(prePage,currentPage,moveX+20);
-            },10);
+            raf(function(){
+                _this.turnPrePage(prePage,currentPage,moveX+60);
+            });
+//            setTimeout(function(){
+//                _this.turnPrePage(prePage,currentPage,moveX+20);
+//            },10);
         }
     },
     dragNextPage:function(moveX){
@@ -114,8 +129,8 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchstart",function(e){
             var touch = e.touches[0];
             touchStart={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
             e.stopPropagation();
             e.preventDefault();
@@ -123,8 +138,8 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchmove",function(e){
             var touch = e.touches[0];
             touchCurrent={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
 
             var disX = touchCurrent.x-touchStart.x;
@@ -155,10 +170,10 @@ var NormalCanvasUtil = NovelCanvasUtil.extend({
         canvas.addEventListener("touchend",function(e){
             var touch = e.changedTouches[0];
             touchEnd={
-                x:touch.pageX,
-                y:touch.pageY
+                x:touch.pageX*_this.scaleX,
+                y:touch.pageY*_this.scaleY
             }
-            var x = touch.pageX;
+            var x = touch.pageX*_this.scaleX;
             if(isClick){
                 if(x>_this.width*0.66){
                     _this.drawNextPage();
