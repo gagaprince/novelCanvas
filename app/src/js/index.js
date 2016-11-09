@@ -1,5 +1,15 @@
 "use strict";
 var NovelCanvas = require('./NovelCanvas.js');
+
+function getQueryString(name,urldefault) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var url = urldefault || window.location.search.substr(1);
+    var r = url.match(reg);
+    if (r != null)
+        return decodeURIComponent(r[2]);
+    return null;
+}
+
 window.onload=function(){
     var height = $(window).height();
     var width = $(window).width();
@@ -13,7 +23,7 @@ window.onload=function(){
         lineHeight:28*devicePixelRatio,
         scale:devicePixelRatio,
         fontColor:"#123456",
-        turnType:1,
+        turnType:getQueryString("type")||1,
         rect:{
             top:10,
             bottom:25,
