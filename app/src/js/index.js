@@ -13,7 +13,7 @@ window.onload=function(){
         lineHeight:28*devicePixelRatio,
         scale:devicePixelRatio,
         fontColor:"#123456",
-        turnType:1,
+        turnType:2,
         rect:{
             top:10,
             bottom:25,
