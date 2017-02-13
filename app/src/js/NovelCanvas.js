@@ -34,6 +34,7 @@
             bgUrl:null,
             scale:1,
             lineHeight:20,
+            currentArtIndex:0,
             rect:{}
         },
         init:function(options){
@@ -64,7 +65,7 @@
             var pullData = this.options.pullData;
             ArtProvider = new ArtProvider({
                 needArtByIndex:pullData,
-                initIndex:0,
+                initIndex:this.options.currentArtIndex,
                 initReady:function(){
                     console.log("artProvider ready");
                     setTimeout(function(){

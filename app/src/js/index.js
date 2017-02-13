@@ -24,6 +24,7 @@ window.onload=function(){
         scale:devicePixelRatio,
         fontColor:"#123456",
         turnType:getQueryString("type")||1,
+        currentArtIndex:0,
         rect:{
             top:10,
             bottom:25,

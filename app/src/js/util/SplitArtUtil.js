@@ -32,7 +32,10 @@ var SplitArtUtil={
         return textArt;
     },
     replace:function(text){
-        return text.replace(/<br\/>/g,'\n');
+        return text.replace(/\n/g,'')
+            .replace(/<br\/>/g,'\n')
+            .replace(/<br>/g,'\n')
+            .replace(/&nbsp;/g,' ');
     },
     splitPage:function(textArt,textSY){
         var rect = this.rect;
