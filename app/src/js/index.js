@@ -27,14 +27,18 @@ window.onload=function(){
         currentArtIndex:0,
         rect:{
             top:10,
-            bottom:25,
+            bottom:45,
             left:20,
             right:15
         },
         pullData:function(currentArtIndex,onGet){
             if(currentArtIndex>=0){
                 setTimeout(function(){
-                    onGet(art);
+                    var artR = {
+                        content:art,
+                        chapterTitle:"第一章"
+                    }
+                    onGet(artR);
                 });
             }
         }

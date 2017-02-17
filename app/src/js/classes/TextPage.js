@@ -3,6 +3,7 @@ var HClass = require('./HClass');
 var TextPage = HClass.extend({
     textLines:null,
     pageIndex:0,
+    title:"",
     ctor:function(){
         this.textLines=[];
     },
@@ -12,6 +13,15 @@ var TextPage = HClass.extend({
     },
     setPage:function(pageIndex){
         this.pageIndex = pageIndex;
+    },
+    getPage:function(){
+        return this.pageIndex;
+    },
+    setTitle:function(title){
+        this.title = title;
+    },
+    getTitle:function(){
+        return this.title;
     },
     getTextLines:function(){
         return this.textLines;

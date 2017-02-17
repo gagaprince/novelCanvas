@@ -5,10 +5,12 @@ var TextArt = HClass.extend({
     allText:"",
     currentPage:0,
     artIndex:0,
-    ctor:function(text,artIndex){
+    title:"",
+    ctor:function(text,artIndex,title){
         this.allText = text;
         this.textPages=[];
         this.artIndex = artIndex;
+        this.title = title;
     },
     getArtIndex:function(){
         return this.artIndex;
@@ -21,6 +23,7 @@ var TextArt = HClass.extend({
     },
     addTextPage:function(textPage){
         textPage.setPage(this.textPages.length);
+        textPage.setTitle(this.title);
         this.textPages.push(textPage);
     },
     getCurrentPage:function(){

@@ -23,9 +23,15 @@ var SplitArtUtil={
         this.ctx = options.bctx;//取缓冲屏的画笔
     },
     splitArt:function(text,artIndex){
-        text = this.replace(text);
-        var textArt = new TextArt(text,artIndex);
-        var textSY = text;
+        var content = text;
+        var title = "";
+        if(typeof text != "string"){
+            content = text.content;
+            title = text.chapterTitle;
+        }
+        content = this.replace(content);
+        var textArt = new TextArt(content,artIndex,title);
+        var textSY = content;
         while(textSY.length>0){
             textSY = this.splitPage(textArt,textSY);
         }
