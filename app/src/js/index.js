@@ -41,6 +41,10 @@ window.onload=function(){
                     onGet(artR);
                 });
             }
+        },
+        onPageTurn:function(currentChapter,pno){
+            //可以记录自动书签
+            console.log("当前章节："+currentChapter+"  当前页码："+pno);
         }
     });
 

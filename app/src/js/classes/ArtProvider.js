@@ -9,10 +9,12 @@ var ArtProvider = TextArt.extend({
     currentArt:null,
     nextArt:null,
     initReady:null,
+    onPageTurn:null,
     ctor:function(options){
         this.needArtByIndex = options.needArtByIndex;
         this.initIndex = options.initIndex;
         this.initReady = options.initReady;
+        this.onPageTurn = options.onPageTurn;
         this.init();
     },
     init:function(){
@@ -119,7 +121,11 @@ var ArtProvider = TextArt.extend({
             //向后翻动章节
             this.preparedNextArt();
         }
-
+        if(this.onPageTurn){
+            var chapter = this.currentArt.getArtIndex();
+            var pno = this.getCurrentPage().getPage();
+            this.onPageTurn(chapter,pno);
+        }
     },
     preparedPreArt:function(){
         //请求之前的章节

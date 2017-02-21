@@ -35,7 +35,8 @@
             scale:1,
             lineHeight:20,
             currentArtIndex:0,
-            rect:{}
+            rect:{},
+
         },
         init:function(options){
             $.extend(this.options,options);
@@ -63,8 +64,10 @@
         },
         initArtProvider:function(){
             var pullData = this.options.pullData;
+            var onPageTurn = this.options.onPageTurn
             ArtProvider = new ArtProvider({
                 needArtByIndex:pullData,
+                onPageTurn:onPageTurn,
                 initIndex:this.options.currentArtIndex,
                 initReady:function(){
                     console.log("artProvider ready");

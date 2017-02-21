@@ -124,6 +124,7 @@ var CanvasUtil = HClass.extend({
         }else{
             //发出已经到最后一页的广播
         }
+        return textArt.getPage();
     },
     drawPrePage:function(){
         var textArt = this.currentTextArt;
@@ -153,11 +154,14 @@ var CanvasUtil = HClass.extend({
         this.drawText(title,20,30,16);
     },
     drawTextLines:function(textPage){
+        var ctx = this.bctx;
+        ctx.save();
         var textLines = textPage.getTextLines();
         for(var i=0;i<textLines.length;i++){
             var textLine = textLines[i];
             this.drawTextLine(textLine);
         }
+        ctx.restore();
     },
     drawCurrentPageNum:function(textPage){
         var pageNum = "第"+(textPage.getPage()+1)+"页";
@@ -187,12 +191,16 @@ var CanvasUtil = HClass.extend({
     },
     drawText:function(text,x,y,fontSize){
         var ctx = this.bctx;
-        ctx.save();
         if(fontSize){
+            var ctx = this.bctx;
+            ctx.save();
             ctx.font=fontSize+"px "+this.fontFamilay;
+            ctx.fillText(text,x,y);
+            ctx.restore();
+        }else{
+            ctx.fillText(text,x,y);
         }
-        ctx.fillText(text,x,y);
-        ctx.restore();
+//        ctx.fillText(text,x,y);
     },
     repaint:function(){
         var ctx = this.ctx;
