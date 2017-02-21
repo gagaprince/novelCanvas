@@ -16,5 +16,20 @@ module.exports = {
     entry:entryObj,
     output: {
         filename: "[name].js"
+    },
+    resolve:{
+        extensions:['','.js','.css','.less']
+    },
+    module: {
+        loaders: [
+            {
+                test: /\.css?$/,
+                loader: "style!css"
+            },
+            {
+                test: /\.less?$/,
+                loader: "style!css!less"
+            }
+        ]
     }
 };

@@ -124,6 +124,7 @@ var CanvasUtil = HClass.extend({
         }else{
             //发出已经到最后一页的广播
         }
+        return textArt.getPage();
     },
     drawPrePage:function(){
         var textArt = this.currentTextArt;
@@ -142,13 +143,29 @@ var CanvasUtil = HClass.extend({
         ctx.save();
         ctx.translate(moveX,0);
         this.clearDisk();
+        this.drawTitle(textPage);
+        this.drawTextLines(textPage);
+        this.drawCurrentPageNum(textPage);
+        ctx.restore();
+        this.repaint();
+    },
+    drawTitle:function(textPage){
+        var title = textPage.getTitle();
+        this.drawText(title,20,30,16);
+    },
+    drawTextLines:function(textPage){
+        var ctx = this.bctx;
+        ctx.save();
         var textLines = textPage.getTextLines();
         for(var i=0;i<textLines.length;i++){
             var textLine = textLines[i];
             this.drawTextLine(textLine);
         }
         ctx.restore();
-        this.repaint();
+    },
+    drawCurrentPageNum:function(textPage){
+        var pageNum = "第"+(textPage.getPage()+1)+"页";
+        this.drawText(pageNum,this.width-70,this.height-30,18);
     },
     drawTextLine:function(textLine){
         var text = textLine.text;
@@ -172,11 +189,18 @@ var CanvasUtil = HClass.extend({
         }
         ctx.restore();
     },
-    drawText:function(text,x,y){
+    drawText:function(text,x,y,fontSize){
         var ctx = this.bctx;
-        ctx.save();
-        ctx.fillText(text,x,y);
-        ctx.restore();
+        if(fontSize){
+            var ctx = this.bctx;
+            ctx.save();
+            ctx.font=fontSize+"px "+this.fontFamilay;
+            ctx.fillText(text,x,y);
+            ctx.restore();
+        }else{
+            ctx.fillText(text,x,y);
+        }
+//        ctx.fillText(text,x,y);
     },
     repaint:function(){
         var ctx = this.ctx;

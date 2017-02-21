@@ -5,14 +5,18 @@ var TextArt = require('./TextArt');
 var ArtProvider = TextArt.extend({
     needArtByIndex:null,//外部传入的请求数据的函数
     initIndex:0,
+    initPage:0,
     preArt:null,
     currentArt:null,
     nextArt:null,
     initReady:null,
+    onPageTurn:null,
     ctor:function(options){
         this.needArtByIndex = options.needArtByIndex;
         this.initIndex = options.initIndex;
+        this.initPage = options.initPage;
         this.initReady = options.initReady;
+        this.onPageTurn = options.onPageTurn;
         this.init();
     },
     init:function(){
@@ -25,6 +29,7 @@ var ArtProvider = TextArt.extend({
                //初始化当前页面
                 var textArt = SplitArtUtil.splitArt(text,currentIndex);
                 _this.currentArt = textArt;
+                _this.setCurrentPage(_this.initPage);
                 _this.pushAllPageIn(textArt);
                 _this.getNextArt(textArt);
                 _this.getPreArt(textArt);
@@ -119,7 +124,11 @@ var ArtProvider = TextArt.extend({
             //向后翻动章节
             this.preparedNextArt();
         }
-
+        if(this.onPageTurn){
+            var chapter = this.currentArt.getArtIndex();
+            var pno = this.getCurrentPage().getPage();
+            this.onPageTurn(chapter,pno);
+        }
     },
     preparedPreArt:function(){
         //请求之前的章节

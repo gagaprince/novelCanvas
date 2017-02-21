@@ -1,5 +1,15 @@
 "use strict";
 var NovelCanvas = require('./NovelCanvas.js');
+
+function getQueryString(name,urldefault) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var url = urldefault || window.location.search.substr(1);
+    var r = url.match(reg);
+    if (r != null)
+        return decodeURIComponent(r[2]);
+    return null;
+}
+
 window.onload=function(){
     var height = $(window).height();
     var width = $(window).width();
@@ -13,19 +23,29 @@ window.onload=function(){
         lineHeight:28*devicePixelRatio,
         scale:devicePixelRatio,
         fontColor:"#123456",
-        turnType:2,
+        turnType:getQueryString("type")||1,
+        currentArtIndex:0,
+        currentPage:4,
         rect:{
             top:10,
-            bottom:25,
+            bottom:45,
             left:20,
             right:15
         },
         pullData:function(currentArtIndex,onGet){
             if(currentArtIndex>=0){
                 setTimeout(function(){
-                    onGet(art);
+                    var artR = {
+                        content:art,
+                        chapterTitle:"第一章"
+                    }
+                    onGet(artR);
                 });
             }
+        },
+        onPageTurn:function(currentChapter,pno){
+            //可以记录自动书签
+            console.log("当前章节："+currentChapter+"  当前页码："+pno);
         }
     });
 

@@ -34,7 +34,10 @@
             bgUrl:null,
             scale:1,
             lineHeight:20,
-            rect:{}
+            currentArtIndex:0,
+            currentPage:0,
+            rect:{},
+
         },
         init:function(options){
             $.extend(this.options,options);
@@ -62,9 +65,12 @@
         },
         initArtProvider:function(){
             var pullData = this.options.pullData;
+            var onPageTurn = this.options.onPageTurn
             ArtProvider = new ArtProvider({
                 needArtByIndex:pullData,
-                initIndex:0,
+                onPageTurn:onPageTurn,
+                initIndex:this.options.currentArtIndex,
+                initPage:this.options.currentPage,
                 initReady:function(){
                     console.log("artProvider ready");
                     setTimeout(function(){
